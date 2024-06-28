@@ -31,5 +31,5 @@ variable "ami_id" {
 variable "instance_type" {
   description = "The instance type for the EC2 instance"
   type        = string
-  default     = "t2.micro"
+  default     = "t4.large"
 }
