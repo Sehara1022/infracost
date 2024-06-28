@@ -39,6 +39,8 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.0 # Set this to 0.14 or later
 
     - name: Setup Infracost
       uses: infracost/actions/setup@v2
@@ -47,30 +49,30 @@ jobs:
       if: github.event_name == 'pull_request'
 
     - name: Checkout base branch
-      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE  == 'hcl_code') }}
+      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE == 'hcl_code') }}
       uses: actions/checkout@v3
       with:
         ref: '${{ github.event.pull_request.base.ref }}'
-
+      
     - name: Generate Infracost cost estimate baseline
-      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE  == 'hcl_code') }}
+      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE == 'hcl_code') }}
       run: |
         infracost breakdown --path=. \
                             --format=json \
                             --out-file=/tmp/infracost-base.json
 
     - name: Checkout PR branch
-      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE  == 'hcl_code') }}
+      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE == 'hcl_code') }}
       uses: actions/checkout@v3
 
     - name: Generate Infracost diff
-      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE  == 'hcl_code') }}
+      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE == 'hcl_code') }}
       run: |
         infracost diff --path=. \
                         --format=json \
                         --compare-to=/tmp/infracost-base.json \
                         --out-file=/tmp/infracost.json
-
+  
     - name: Terraform Init
       id: init
       run: terraform init -chdir=ec2
@@ -92,7 +94,7 @@ jobs:
       continue-on-error: true
 
     - name: Generate Infracost diff
-      if:  ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE  == 'tf_plan') }}
+      if: ${{ (github.event_name == 'pull_request') && (vars.INFRACOST_SCAN_TYPE == 'tf_plan') }}
       run: |
         infracost diff --path=TFplan.JSON \
                         --format=json \
@@ -137,3 +139,7 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
+
+    # - name: Terraform Apply
+    #   if: github.ref == 'refs/heads/main'
+    #   run: terraform apply -auto-approve -input=false
