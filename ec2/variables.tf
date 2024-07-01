@@ -37,5 +37,5 @@ variable "ec2_instance_type" {
 variable "instance_type" {
   description = "The instance type for the EC2 instance"
   type        = string
-  default     = "t3.large"
+  default     = "t4g.2xlarge"
 }
