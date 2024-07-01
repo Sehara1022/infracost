@@ -51,6 +51,16 @@ resource "aws_instance" "web" {
     Name = "web-server"
   }
 }
+resource "aws_instance" "ec2" {
+  ami           = var.ami_id
+  instance_type = t3.large
+  subnet_id     = aws_subnet.main.id
+  security_groups = [aws_security_group.main.name]
+
+  tags = {
+    Name = "web-server"
+  }
+}
 
 output "instance_id" {
   value = aws_instance.web.id
